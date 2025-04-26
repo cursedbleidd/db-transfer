@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Protos";
+
+package project;
+
+service ProjectService {
+  rpc CreateProject (stream ProjectRequest) returns (ProjectResponse);
+}
+
+message ProjectRequest {
+  string first_name = 1;
+  string last_name = 2;
+  string email = 3;
+  string project_name = 4;
+  string project_status = 5;
+  string task_name = 6;
+  string executor_name = 7;
+  string task_status = 8;
+  string team_name = 9;
+  int64 project_start_date = 10; // Unix timestamp in seconds
+  int64 project_end_date = 11;   // Unix timestamp in seconds
+  int64 task_due_date = 12;      // Unix timestamp in seconds
+}
+
+message ProjectResponse {
+  string message = 1;
+}

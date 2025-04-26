@@ -18,4 +18,7 @@ public partial class Library
     public DateOnly BorrowDate { get; set; }
 
     public DateOnly? ReturnDate { get; set; }
+
+    public override string ToString() =>
+        $"{BookTitle} {AuthorName} {ReaderName} {BorrowDate}";
 }

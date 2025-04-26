@@ -41,6 +41,8 @@ namespace db_transfer
                 
                 var reader = await libraryContext.Readers.FirstOrDefaultAsync(r => r.Name == library.ReaderName);
                 borrow.Reader = reader ?? new Reader() { Name = library.ReaderName };
+
+                libraryContext.Readers.Add(new Reader());
                 
                 var book = await libraryContext.Books
                     .Include(b => b.Authors) 

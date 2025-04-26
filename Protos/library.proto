@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "Protos";
+
+package library;
+
+service LibraryService {
+  rpc CreateLibrary (stream LibraryRequest) returns (LibraryResponse);
+}
+
+message LibraryRequest {
+  string book_title = 1;
+  string book_genre = 2;
+  string author_name = 3;
+  string reader_name = 4;
+  int64 borrow_date = 5; // Unix timestamp in seconds
+  int64 return_date = 6;   // Unix timestamp in seconds
+}
+
+message LibraryResponse {
+  string message = 1;
+}
