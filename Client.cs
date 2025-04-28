@@ -13,10 +13,10 @@ namespace db_transfer
 {
     internal class Client
     {
-        string deviceName = "DESKTOP-B0RNFQA";
-        int port = 13000;
+        string deviceName;
+        int port;
 
-        public Client(string deviceName, int port)
+        public Client(string deviceName = "DESKTOP-B0RNFQA", int port = 13000)
         {
             this.deviceName = deviceName;
             this.port = port;
@@ -71,7 +71,7 @@ namespace db_transfer
                 {
                     X509Certificate2 caCertificate = new X509Certificate2("C:\\Certs\\RootCA.cer");
 
-                    sslStream.AuthenticateAsClient("localhost"); // имя сервера
+                    sslStream.AuthenticateAsClient("localhost"); 
 
                     using IdentifierContext identifierContext = new IdentifierContext();
 
@@ -83,11 +83,11 @@ namespace db_transfer
                             string json = JsonConvert.SerializeObject(librrary);
                             byte[] data = Encoding.UTF8.GetBytes(json);
 
-                            // Отправка длины сообщения (4 байта)
+                            
                             byte[] lengthBytes = BitConverter.GetBytes(data.Length);
                             sslStream.Write(lengthBytes, 0, lengthBytes.Length);
 
-                            // Разбиение данных на фрагменты по 42 байта
+                            
                             int chunkSize = 42;
                             for (int i = 0; i < data.Length; i += chunkSize)
                             {
@@ -103,62 +103,62 @@ namespace db_transfer
 
         public void StartRabbit()
         {   
-            IPHostEntry hostEntry = Dns.GetHostEntry(deviceName);
-            IPAddress deviceIp = null!;
-            foreach (var address in hostEntry.AddressList)
-            {
-                if (address.AddressFamily == AddressFamily.InterNetwork)
+                IPHostEntry hostEntry = Dns.GetHostEntry(deviceName);
+                IPAddress deviceIp = null!;
+                foreach (var address in hostEntry.AddressList)
                 {
-                    deviceIp = address;
-                    break;
-                }
-            }
-            Console.WriteLine($"Используем IP-адрес: {deviceIp}");
-            string rabbitmqHost = deviceIp.ToString();
-
-            var sslOptions = new SslOption
-            {
-                Enabled = true,
-                ServerName = "localhost"
-            };
-            var factory = new ConnectionFactory()
-            {
-                HostName = rabbitmqHost,
-                Port = 5671,
-                UserName = "user1",
-                Password = "user1",
-                Ssl = sslOptions
-            };
-
-            using (var connection = factory.CreateConnection())
-            {
-                using (var channel = connection.CreateModel())
-                {
-                    channel.QueueDeclare(queue: "test_queue1",
-                                         durable: false,
-                                         exclusive: false,
-                                         autoDelete: true,
-                                         arguments: null);
-                    using IdentifierContext identifierContext = new IdentifierContext();
-
-                    foreach (var project in identifierContext.Libraries)
+                    if (address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        string json = JsonConvert.SerializeObject(project);
-                        byte[] data = Encoding.UTF8.GetBytes(json);
-
-                        channel.BasicPublish(
-                            exchange: "",
-                            routingKey: "test_queue1",
-                            basicProperties: null,
-                            body: data
-                        );
+                        deviceIp = address;
+                        break;
                     }
-                    Console.WriteLine("Успешно отправлено!");
                 }
-            }
+                Console.WriteLine($"Используем IP-адрес: {deviceIp}");
+                string rabbitmqHost = deviceIp.ToString();
+
+                var sslOptions = new SslOption
+                {
+                    Enabled = true,
+                    ServerName = "localhost",
+                };
+                var factory = new ConnectionFactory()
+                {
+                    HostName = rabbitmqHost,
+                    Port = 5671,
+                    UserName = "user1",
+                    Password = "user1",
+                    Ssl = sslOptions
+                };
+
+                using (var connection = factory.CreateConnection())
+                {
+                    using (var channel = connection.CreateModel())
+                    {
+                        channel.QueueDeclare(queue: "test_queue1",
+                                             durable: false,
+                                             exclusive: false,
+                                             autoDelete: true,
+                                             arguments: null);
+                        using IdentifierContext identifierContext = new IdentifierContext();
+
+                        foreach (var project in identifierContext.Libraries)
+                        {
+                            string json = JsonConvert.SerializeObject(project);
+                            byte[] data = Encoding.UTF8.GetBytes(json);
+
+                            channel.BasicPublish(
+                                exchange: "",
+                                routingKey: "test_queue1",
+                                basicProperties: null,
+                                body: data
+                            );
+                        }
+                        Console.WriteLine("Успешно отправлено!");
+                    }
+                }
         }
 
-        public async Task SendProjectsAsync(List<Library> libraries)
+        public async Task SendProjectsAsync()
         {
             IPHostEntry hostEntry = Dns.GetHostEntry(deviceName);
             IPAddress deviceIp = null;
@@ -186,8 +186,8 @@ namespace db_transfer
             try
             {
                 using var call = client.CreateLibrary();
-
-                foreach (var library in libraries)
+                using IdentifierContext identifierContext = new IdentifierContext();
+                foreach (var library in identifierContext.Libraries)
                 {
                     var libraryRequest = new LibraryRequest
                     {

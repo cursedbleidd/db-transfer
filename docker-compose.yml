@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"  # HTTP management port
+      - "5671:5671"    # SSL port
+    volumes:
+      - /c/Certs:/certs                # Mount certificates folder to /certs in container
+      - /c/rabbitmq/config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf  # Mount config file to /etc/rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped

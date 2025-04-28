@@ -13,16 +13,81 @@ namespace db_transfer
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Начало импорта данных в нормализованную БД");
-            await TransferData();
-            Console.WriteLine("Импорт прошел успешно");
-            Console.WriteLine("Введите имя читателя:");
-            var name = Console.ReadLine();
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
-            await ExportDataToExcel(name);
-            Console.ReadKey();
-            Console.WriteLine("Очистка базы данных...");
-            await ClearDB();
+            //Console.WriteLine("Начало импорта данных в нормализованную БД");
+            //await TransferData();
+            //Console.WriteLine("Импорт прошел успешно");
+            //Console.WriteLine("Введите имя читателя:");
+            //var name = Console.ReadLine();
+            //ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
+            //await ExportDataToExcel(name);
+            //Console.ReadKey();
+            //Console.WriteLine("Очистка базы данных...");
+            //await ClearDB();
+
+            string menu = """
+                Выберите опцию:
+                Socket
+                1. Отправить
+                2. Получить
+                Rabbit
+                3. Отправить
+                4. Получить
+                gRPC
+                5. Отправить
+                6. Получить
+
+                7. Очистить Postgres
+                8. Импорт в эксель
+                0. Выход
+                """;
+
+            Console.WriteLine(menu);
+            
+            while (int.TryParse(Console.ReadLine(), out int choice) && choice != 0)
+            {
+                switch (choice) 
+                {
+                    case int i when i % 2 == 1 && i < 7: 
+                        Client client = new();
+                        switch (i)
+                        {
+                            case 1:
+                                client.StartSocket();
+                                break;
+                            case 3:
+                                client.StartRabbit();
+                                break;
+                            case 5:
+                                client.StartRabbit();
+                                break;
+                        }
+                        break;
+                    case int i when i % 2 == 0 || i >= 7:
+                        Server server = new();
+                        switch (i)
+                        {
+                            case 2:
+                                server.StartSocketServer();
+                                break;
+                            case 4:
+                                server.ReadFromQueue();
+                                break;
+                            case 6:
+                                await server.StartGrpcServerAsync();
+                                break;
+                            case 7:
+                                server.TruncateTables();
+                                break;
+                            case 8:
+                                server.RunPythonScript();
+                                break;
+                        }
+                        break;
+                }
+                Console.ReadKey();
+                Console.Clear();
+                Console.WriteLine(menu);
+            }
         }
 
         static async Task TransferData()
