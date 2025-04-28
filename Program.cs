@@ -58,7 +58,7 @@ namespace db_transfer
                                 client.StartRabbit();
                                 break;
                             case 5:
-                                client.StartRabbit();
+                                await client.SendProjectsAsync();
                                 break;
                         }
                         break;
