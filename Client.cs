@@ -84,7 +84,7 @@ namespace db_transfer
                             byte[] data = Encoding.UTF8.GetBytes(json);
 
                             
-                            byte[] lengthBytes = BitConverter.GetBytes(data.Length);
+                            byte[] lengthBytes = BitConverter.GetBytes(IPAddress.NetworkToHostOrder(data.Length));
                             sslStream.Write(lengthBytes, 0, lengthBytes.Length);
 
                             

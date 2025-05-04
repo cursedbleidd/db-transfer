@@ -191,7 +191,7 @@ namespace db_transfer
                     int bytesRead = sslStream.Read(lengthBytes, 0, lengthBytes.Length);
                     if (bytesRead == 0) break;
 
-                    int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+                    int messageLength = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lengthBytes, 0));
 
                     byte[] buffer = new byte[messageLength];
                     int totalBytesRead = 0;
